@@ -12,94 +12,84 @@ queue<string> q;
 // create a socket
 SOCKET server_socket;
 
+// initialise winsock
+WSADATA wsa;
+
 #define BUFLEN 1024 * 4
 
-void CreateListener(int port) {
+char* CreateListener(int port) {
 
-    system("title UDP Server");
+	system("title UDP Server");
 
-    sockaddr_in server, client;
+	sockaddr_in server, client;
 
-    // initialise winsock
-    WSADATA wsa;
+	cout << "Initialising Winsock...\n";
 
-    printf("Initialising Winsock...");
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	{
+		printf("Failed. Error Code: %d", WSAGetLastError());
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-    {
-        printf("Failed. Error Code: %d", WSAGetLastError());
+		exit(0);
+	}
 
-        exit(0);
-    }
+	cout << "Initialised.\n";
 
-    printf("Initialised.\n");
+	if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
+		return  (char*)"Could not create socket: " + WSAGetLastError();
 
 
-    if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
-    {
-        printf("Could not create socket: %d", WSAGetLastError());
-    }
+	cout << "Socket created on port: " << port << ".\n";
 
-    cout << "Socket created on port: " << port << ".\n";
+	//  IPv4 socket address
+	server.sin_family = AF_INET;
 
-    //  IPv4 socket address
-    server.sin_family = AF_INET;
+	// allowing it to receive UDP packets sent to any IP address
+	server.sin_addr.s_addr = INADDR_ANY;
 
-    // allowing it to receive UDP packets sent to any IP address
-    server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(port);
 
-    server.sin_port = htons(port);
+	// bind
+	if (bind(server_socket, (sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
+		return  (char*)"Could not create socket: " + WSAGetLastError();
 
-    // bind
-    if (bind(server_socket, (sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
-    {
-        printf("Bind failed with error code: %d", WSAGetLastError());
+	cout << "Bind done.\n";
 
-        exit(EXIT_FAILURE);
-    }
+	while (1)
+	{
+		char message[BUFLEN] = {};
 
-    puts("Bind done.");
+		int message_len;
 
-    while (1)
-    {
-        char message[BUFLEN] = {};
+		int slen = sizeof(sockaddr_in);
 
-        int message_len;
+		if (message_len = recvfrom(server_socket, message, BUFLEN, 0, (sockaddr*)&client, &slen) == SOCKET_ERROR)
+			return  (char*)"recvfrom() failed with error code: " + WSAGetLastError();
 
-        int slen = sizeof(sockaddr_in);
 
-        if (message_len = recvfrom(server_socket, message, BUFLEN, 0, (sockaddr*)&client, &slen) == SOCKET_ERROR)
-        {
-            printf("recvfrom() failed with error code: %d", WSAGetLastError());
+		q.push(message);
+	}
 
-            exit(0);
-        }
-
-        q.push(message);
-    }
-
-    WSACleanup();
+	WSACleanup();
 }
 
 void CloseSocket() {
 
-    closesocket(server_socket);
+	closesocket(server_socket);
 
-    WSACleanup();
+	WSACleanup();
 }
 
 int GetQueueSize() {
-    return q.size();
+	return q.size();
 }
 
 void GetReceivedMessage(LPSTR msg) {
 
-    string message = q.front();
+	string message = q.front();
 
-    strcpy(msg, message.c_str());
+	strcpy(msg, message.c_str());
 
-    q.pop();
-
+	q.pop();
 }
 
 

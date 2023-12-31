@@ -6,46 +6,38 @@ namespace UdpServerCppWrapper;
 public class UdpServerCppApi
 {
     private const string DllFilePath
-        = @"C:\Users\mm\Desktop\UdpServer\x64\Debug\UdpServerCpp.dll";
+        = @"D:\projects\.net\UdpServer\x64\Debug\UdpServerCpp.dll";
 
     [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void CreateListener(int port);
-
-
-    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void CloseSocket();
-
-
-    //[DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
-    //private extern static IntPtr GetReceivedMessage();
+    private static extern IntPtr CreateListener(int port);
 
 
     [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void GetReceivedMessage(StringBuilder sMsg);
-
-
-
+    private static extern void CloseSocket();
+    
 
     [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
-    private extern static int GetQueueSize();
+    private static extern void GetReceivedMessage(StringBuilder sMsg);
+    
 
-    public void CreteNewListener(int port) => CreateListener(port);
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int GetQueueSize();
+
+    public string CreteNewListener(int port) =>
+        Marshal.PtrToStringAnsi(CreateListener(port))!;
 
     public void CloseListener() => CloseSocket();
 
     public int GetSize() => GetQueueSize();
-
-
+    
     public string GetMessage()
     {
-        if (GetQueueSize() > 0)
-            //return Marshal.PtrToStringAnsi(GetReceivedMessage())!;
-        {
-            StringBuilder msg = new StringBuilder(1024);
-            GetReceivedMessage(msg);
-            return msg.ToString();
-        }
+        if (GetQueueSize() <= 0) return String.Empty;
 
-        return String.Empty;
+        StringBuilder msg = new StringBuilder(1024);
+
+        GetReceivedMessage(msg);
+
+        return msg.ToString();
     }
 }

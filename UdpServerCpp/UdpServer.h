@@ -8,7 +8,7 @@
 
 extern "C" {
 
-    __declspec(dllexport) void CreateListener(int port);
+    __declspec(dllexport) char* CreateListener(int port);
 
     __declspec(dllexport) void CloseSocket();
 

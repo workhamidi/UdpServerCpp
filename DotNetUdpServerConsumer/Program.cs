@@ -1,4 +1,5 @@
-﻿using UdpServerCppWrapper;
+﻿using System.Reflection;
+using UdpServerCppWrapper;
 
 
 namespace DotNetUdpServerConsumer;
@@ -9,26 +10,40 @@ public class Program
 
     public static void Main()
     {
-        var u = new UdpServerCppApi();
-
-        Task.Run(() =>
+        try
         {
-            u.CreteNewListener(8888);
-        });
+            var u = new UdpServerCppApi();
+            
+            Task.Run(() => Console.WriteLine($"- {u.CreteNewListener(8888)} -"));
 
-        Thread.Sleep(5000);
+            Thread.Sleep(5000);
 
-        while (true && u.GetSize() > 0)
+            while (true && u.GetSize() > 0)
+            {
+                myList.Add(u.GetMessage());
+            }
+
+            var duplicates = myList
+                .GroupBy(x => x)
+                .ToList();
+
+            Console.WriteLine(myList.Count);
+
+            u.CloseListener();
+
+            Console.WriteLine("ok");
+
+            //var v = new UdpServerCppApi();
+
+            //Task.Run(() => Console.WriteLine($"- {v.CreteNewListener(8888)} -"));
+
+        }
+        catch (Exception e)
         {
-           myList.Add(u.GetMessage());
+            Console.WriteLine(e);
+            throw;
         }
 
-        var duplicates = myList
-            .GroupBy(x => x)
-            .ToList();
-
-
-        Console.WriteLine();
 
     }
 }
