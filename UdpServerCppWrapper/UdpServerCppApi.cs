@@ -34,10 +34,14 @@ public class UdpServerCppApi
     {
         if (GetQueueSize() <= 0) return String.Empty;
 
-        StringBuilder msg = new StringBuilder(1024);
+        var msg = new StringBuilder(1024);
 
         GetReceivedMessage(msg);
 
-        return msg.ToString();
+        var tempStr = msg.ToString();
+
+        if (string.IsNullOrEmpty(tempStr)) return String.Empty;
+
+        return tempStr;
     }
 }
