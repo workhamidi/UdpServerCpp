@@ -22,20 +22,15 @@ public class Program
             {
                 myList.Add(u.GetMessage());
             }
-
-            var duplicates = myList
-                .GroupBy(x => x)
-                .ToList();
-
+            
             Console.WriteLine(myList.Count);
 
             u.CloseListener();
 
-            Console.WriteLine("ok");
+            Console.WriteLine("press eny key to close app");
 
-            //var v = new UdpServerCppApi();
+            Console.ReadKey();
 
-            //Task.Run(() => Console.WriteLine($"- {v.CreteNewListener(8888)} -"));
 
         }
         catch (Exception e)

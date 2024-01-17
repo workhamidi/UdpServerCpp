@@ -7,7 +7,7 @@ using namespace std;
 
 #pragma warning(disable:4996) 
 
-queue<string> q;
+moodycamel::ConcurrentQueue<string> q;
 
 // create a socket
 SOCKET server_socket;
@@ -66,7 +66,7 @@ char* CreateListener(int port) {
 			return  (char*)"recvfrom() failed with error code: " + WSAGetLastError();
 
 
-		q.push(message);
+		q.enqueue(message);
 	}
 
 	WSACleanup();
@@ -80,22 +80,18 @@ void CloseSocket() {
 }
 
 int GetQueueSize() {
-	return q.size();
+	return q.size_approx();
 }
 
 void GetReceivedMessage(LPSTR msg) {
 
-	string message = q.front();
+	string message;
 
-	strcpy(msg, message.c_str());
-
-	q.pop();
+	if (q.try_dequeue(message))
+		strcpy(msg, message.c_str());
+	else
+	{
+		string empty_str = "";
+		strcpy(msg, empty_str.c_str());
+	}
 }
-
-
-
-
-
-
-
-

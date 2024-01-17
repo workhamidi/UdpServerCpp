@@ -2,8 +2,7 @@
 #include <winsock2.h>
 #include <algorithm>
 #include <windows.h>
-#include <thread>
-#include <queue>
+#include "concurrentqueue.h"
 
 
 extern "C" {
