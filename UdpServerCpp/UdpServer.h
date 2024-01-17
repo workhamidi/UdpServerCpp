@@ -2,7 +2,10 @@
 #include <winsock2.h>
 #include <algorithm>
 #include <windows.h>
-#include "concurrentqueue.h"
+#include <chrono>
+#include <mutex>
+#include <thread>
+#include <queue>
 
 
 extern "C" {

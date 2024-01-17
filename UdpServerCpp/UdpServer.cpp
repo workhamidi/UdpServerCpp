@@ -1,13 +1,16 @@
 #include "pch.h"
 #include "UdpServer.h"
 
+
 using namespace std;
 
 #pragma comment(lib,"ws2_32.lib") // Winsock Library
 
 #pragma warning(disable:4996) 
 
-moodycamel::ConcurrentQueue<string> q;
+queue<string> q;
+
+mutex g_num_mutex;
 
 // create a socket
 SOCKET server_socket;
@@ -65,8 +68,11 @@ char* CreateListener(int port) {
 		if (message_len = recvfrom(server_socket, message, BUFLEN, 0, (sockaddr*)&client, &slen) == SOCKET_ERROR)
 			return  (char*)"recvfrom() failed with error code: " + WSAGetLastError();
 
+		g_num_mutex.lock();
 
-		q.enqueue(message);
+		q.push(message);
+
+		g_num_mutex.unlock();
 	}
 
 	WSACleanup();
@@ -80,18 +86,27 @@ void CloseSocket() {
 }
 
 int GetQueueSize() {
-	return q.size_approx();
+	return q.size();
 }
 
 void GetReceivedMessage(LPSTR msg) {
 
+	g_num_mutex.lock();
+
 	string message;
 
-	if (q.try_dequeue(message))
-		strcpy(msg, message.c_str());
-	else
+	if (q.size() == 0)
 	{
-		string empty_str = "";
-		strcpy(msg, empty_str.c_str());
+		strcpy(msg, message.c_str());
 	}
+	else 
+	{
+		message = q.front();
+
+		strcpy(msg, message.c_str());
+
+		q.pop();
+	}
+
+	g_num_mutex.unlock();
 }

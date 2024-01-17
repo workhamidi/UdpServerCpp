@@ -20,9 +20,13 @@ public class Program
 
             while (true && u.GetSize() > 0)
             {
-                myList.Add(u.GetMessage());
+                Enumerable.Range(0,10).AsParallel().WithDegreeOfParallelism(10)
+                    .ForAll((i) =>
+                    {
+                        myList.Add(u.GetMessage());
+                    });
             }
-            
+
             Console.WriteLine(myList.Count);
 
             u.CloseListener();

@@ -32,7 +32,7 @@ public class UdpServerCppApi
     
     public string GetMessage()
     {
-        if (GetQueueSize() <= 0) return String.Empty;
+        if (GetQueueSize() == 0) return String.Empty;
 
         var msg = new StringBuilder(1024);
 
